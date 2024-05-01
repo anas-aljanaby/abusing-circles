@@ -64,27 +64,26 @@ class ToggleButton(Button):
 
 class UIManager:
     def __init__(self, game):
-        # self.running = False
         self.buttons = []
+        self.toggle_buttons = []
         self.game = game
         self.create_buttons()
 
-    
     def create_buttons(self):
         button_configs = [
             {'x': 10, 'y': 100, 'width': 80, 'height': 20, 'label': 'Play', 'action': 'play' },
-            {'x': 10, 'y': 122, 'width': 80, 'height': 20, 'label': 'Pause', 'action': 'pause'},
-            {'x': 10, 'y': 144, 'width': 80, 'height': 20, 'label': 'Reset', 'action': 'reset'}, 
+            {'x': 10, 'y': 122, 'width': 80, 'height': 20, 'label': 'Reset', 'action': 'reset'}, 
         ]
         toggle_button_configs = [
             {'x': 10, 'y': 166, 'width': 80, 'height': 20, 'label': 'Size++', 'action': 'size_increase'}
-
         ]
 
         for config in button_configs:
             self.buttons.append(Button(config['x'], config['y'], config['width'], config['height'], config['label'], action=config['action']))
         for config in toggle_button_configs:
-            self.buttons.append(ToggleButton(config['x'], config['y'], config['width'], config['height'], config['label'], action=config['action']))
+            bt = ToggleButton(config['x'], config['y'], config['width'], config['height'], config['label'], action=config['action'])
+            self.buttons.append(bt)
+            self.toggle_buttons.append(bt)
 
     def add_button(self, x, y, width, height, label, action):
         self.buttons.append(Button(x, y, width, height, label, action=action))
@@ -94,6 +93,10 @@ class UIManager:
             bt.is_over(pygame.mouse.get_pos())
             bt.draw(self.game.screen)
 
+    def reset(self):
+        for bt in self.toggle_buttons:
+            bt.action(bt.is_on())
+
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             for bt in self.buttons:
@@ -101,16 +104,5 @@ class UIManager:
                     if type(bt) == ToggleButton:
                         if not self.game.running:
                             bt.toggle()
-
-                    #TODO fix this, reset button should not reset the users choices but only the game state, for now 
-                    # must do this to be consistent with the game class
-                    if bt.action == 'reset':
-                        self.buttons[-1].is_on = False                        
-                    ####
-
                     self.game.handle_event(bt.action)
-
-
-
-
 

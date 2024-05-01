@@ -1,33 +1,39 @@
 import pygame
 import pygame.gfxdraw
-from pygame import mixer
 import math
-import random
-import sys
 
-mixer.init()
-sound =  pygame.mixer.Sound('ball_hit.mp3')
 
 class CircleContainer:
-    def __init__(self, x, y, color='white', r=300, shadow=True):
-        self.x = x
-        self.y = y
-        self.radius = r 
+    def __init__(self, x, y, color='white', radius=300, shadow=True):
+        self._x = x
+        self._y = y
+        self._radius = radius 
         self.color = color
         self.shadow = shadow
 
     def draw(self, scr):
-        pygame.draw.circle(scr, (self.color), (self.x, self.y), self.radius, width=1)
+        pygame.draw.circle(scr, (self.color), (self._x, self._y), self._radius, width=1)
 
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def radius(self):
+        return self._radius
+    
 class Orb:
-    def __init__(self, x, y, color=(255, 255, 255), container=None, tail_type='history'):
-        self.x = x
-        self.y = y
+    def __init__(self, x, y, color=(255, 255, 255), tail_type='history'):
+        self._x = x
+        self._y = y
         self.color = color
-        self.container = container 
-        self.y_speed = 0
-        self.x_speed = 0
-        self.radius = 10 
+        self._y_speed = 0
+        self._x_speed = 0
+        self._radius = 10 
         self.acc = 0.03
         self.tail = []
         self.counter = 0 
@@ -40,11 +46,51 @@ class Orb:
         self.speed = 0
         self.tail_type = tail_type 
         self.gets_bigger = False
+    
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def radius(self):
+        return self._radius
+   
+    @x.setter
+    def x(self, value):
+        self._x = value
+
+    @y.setter
+    def y(self, value):
+        self._y = value
+
+    @radius.setter
+    def radius(self, value):
+        self._radius = value
+
+    @property
+    def x_speed(self):
+        return self._x_speed
+   
+    @x_speed.setter
+    def x_speed(self, value):
+        self._x_speed = value
+
+    @property
+    def y_speed(self):
+        return self._y_speed
+   
+    @y_speed.setter
+    def y_speed(self, value):
+        self._y_speed = value
 
     def draw(self, scr):
         self.draw_tail(scr)
-        pygame.draw.circle(scr, self.history_tail_color, (self.x, self.y), self.radius)
-        pygame.draw.circle(scr, (255, 255, 255), (self.x, self.y), self.radius+1, width=1)
+        pygame.draw.circle(scr, self.history_tail_color, (self._x, self._y), self._radius)
+        pygame.draw.circle(scr, (255, 255, 255), (self._x, self._y), self._radius+1, width=1)
         
     def update_color(self):
         max_color_value = 255
@@ -65,15 +111,10 @@ class Orb:
                 self.color_idx = (self.color_idx + 1) % 3
 
     def update_pos(self):
-        self.y_speed += self.acc
-        self.y += self.y_speed
-        self.x += self.x_speed
-        self.speed = math.sqrt(self.x_speed**2 + self.y_speed**2)
-         
-        # if self.speed_in_bounds(self.x_speed, self.y_speed):
-        #     self.speed = math.sqrt(self.x_speed)
-
-    def update_tail(self):        
+        self._y_speed += self.acc
+        self._y += self._y_speed
+        self._x += self._x_speed
+        self.speed = math.sqrt(self._x_speed**2 + self._y_speed**2)
         if self.tail_type == 'history':
             self.counter += 1
             
@@ -82,42 +123,12 @@ class Orb:
 
             if self.counter >= self.update_interval:
                 self.update_color()
-                self.tail.append((tuple(self.history_tail_color), (self.x, self.y)))
+                self.tail.append((tuple(self.history_tail_color), (self._x, self._y)))
                 self.counter = 0
 
         elif self.tail_type == 'comet':
             self.update_color()
-            self.tail.append((tuple(self.history_tail_color), (self.x, self.y)))
-
-
-    def check_collision(self):
-        if self.container is None:
-            return 
-        dist_squared = (self.x - self.container.x)**2 + (self.y - self.container.y)**2
-        if dist_squared >= (self.container.radius-self.radius) ** 2:
-            sound.play()
-
-            angle = math.atan2(self.y - self.container.y, self.x - self.container.x)
-
-            self.x = self.container.x + (self.container.radius - self.radius) * math.cos(angle)
-            self.y = self.container.y + (self.container.radius - self.radius) * math.sin(angle)
-
-            normal_x = math.cos(angle)
-            normal_y = math.sin(angle)
-
-            dot = self.x_speed * normal_x + self.y_speed * normal_y
-
-            self.x_speed = (self.x_speed - 2 * dot * normal_x)  
-            self.y_speed = (self.y_speed - 2 * dot * normal_y) 
-    
-            speed = self.speed_in_bounds(self.x_speed, self.y_speed*1.03) 
-            if speed:
-                self.y_speed *= 1.06
-
-            #turn on if you want the circle to increase in size after each collision
-            if self.gets_bigger:
-                if self.radius < self.container.radius:
-                    self.radius += 1
+            self.tail.append((tuple(self.history_tail_color), (self._x, self._y)))
 
     def draw_tail(self, scr):
         if self.tail_type == 'history':
@@ -125,27 +136,18 @@ class Orb:
                 print('reduced trail')
                 self.tail = self.tail[-4000:]
             for p in self.tail:
-                pygame.draw.circle(scr, p[0], p[1], self.radius)
-                pygame.draw.circle(scr, (255, 255, 255), p[1], self.radius+1, width=1)
+                pygame.draw.circle(scr, p[0], p[1], self._radius)
+                pygame.draw.circle(scr, (255, 255, 255), p[1], self._radius+1, width=1)
 
         elif self.tail_type == 'comet':
             if len(self.tail) > 40:
                 self.tail = self.tail[-40:]
             for i, p in enumerate(self.tail):
-                pygame.draw.circle(scr, p[0], p[1], self.radius-(40-i))
+                pygame.draw.circle(scr, p[0], p[1], self._radius-(40-i))
 
-
-    def speed_in_bounds(self, x_speed, y_speed):
-        speed = math.sqrt(x_speed**2 + y_speed**2)
-        return speed < 40 
-    
     def update(self):
-        self.check_collision()
         self.update_pos()
         self.update_tail()
-
-    # def loop(self, screen):
-    #     self.draw(screen)
 
 
     
