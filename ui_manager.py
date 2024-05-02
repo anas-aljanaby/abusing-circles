@@ -75,7 +75,8 @@ class UIManager:
             {'x': 10, 'y': 122, 'width': 80, 'height': 20, 'label': 'Reset', 'action': 'reset'}, 
         ]
         toggle_button_configs = [
-            {'x': 10, 'y': 166, 'width': 80, 'height': 20, 'label': 'Size++', 'action': 'size_increase'}
+            {'x': 10, 'y': 166, 'width': 80, 'height': 20, 'label': 'Size++', 'action': 'size_increase'},
+            {'x': 10, 'y': 188, 'width': 80, 'height': 20, 'label': 'Speed++', 'action': 'speed_increase'}
         ]
 
         for config in button_configs:

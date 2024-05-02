@@ -115,6 +115,8 @@ class Orb:
         self._y += self._y_speed
         self._x += self._x_speed
         self.speed = math.sqrt(self._x_speed**2 + self._y_speed**2)
+
+    def update_tail(self):
         if self.tail_type == 'history':
             self.counter += 1
             

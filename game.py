@@ -12,6 +12,7 @@ class Game:
         self.screen = pygame.display.set_mode((1200, 800))
         self.orb = None
         self.increase_orb_size = False
+        self.increase_speed = False
         self.play_sound = play_sound 
         if self.play_sound:
             mixer.init()
@@ -44,10 +45,12 @@ class Game:
 
             self.orb.x_speed = (self.orb.x_speed - 2 * dot * normal_x)  
             self.orb.y_speed = (self.orb.y_speed - 2 * dot * normal_y) 
-            y_speed = self.orb.y_speed * 1.06
-            if (self.orb.x_speed ** 2 + self.orb.y_speed ** 2) < 1600:
-                self.orb.y_speed = y_speed
- 
+            
+            if self.increase_speed:
+                y_speed = self.orb.y_speed * 1.06
+                if (self.orb.x_speed ** 2 + self.orb.y_speed ** 2) < 1600:
+                    self.orb.y_speed = y_speed
+     
             if self.increase_orb_size:
                 if self.orb.radius < self.container.radius:
                     self.orb.radius += 1
@@ -74,7 +77,12 @@ class Game:
     def toggle_size_increase(self):
         if not self.running:
             self.increase_orb_size = not self.increase_orb_size
-        
+
+    def toggle_speed_increase(self):
+        if not self.running:
+            self.increase_speed = not self.increase_speed
+
+
     def handle_event(self, event):
         if event.lower() == 'play':
             self.play_game()
@@ -82,6 +90,8 @@ class Game:
             self.reset_game()
         elif event == 'size_increase':
             self.toggle_size_increase() 
+        elif event == 'speed_increase':
+            self.toggle_speed_increase()
 
     def draw(self):
         if self.orb is None:
