@@ -8,7 +8,7 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-game = Game(play_sound=True)
+game = Game(play_sound=False)
 ui_manager = UIManager(game)
 
 running = True

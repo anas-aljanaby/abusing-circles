@@ -1,7 +1,7 @@
 import pygame
 from pygame import mixer
 from graphics import CircleContainer, Orb
-import random 
+import random
 import math
 import time
 
@@ -45,19 +45,30 @@ class Game:
 
             self.orb.x_speed = (self.orb.x_speed - 2 * dot * normal_x)  
             self.orb.y_speed = (self.orb.y_speed - 2 * dot * normal_y) 
-            
+
             if self.increase_speed:
-                y_speed = self.orb.y_speed * 1.06
+                y_speed = self.orb.y_speed * 1.02
                 if (self.orb.x_speed ** 2 + self.orb.y_speed ** 2) < 1600:
                     self.orb.y_speed = y_speed
-     
+
             if self.increase_orb_size:
                 if self.orb.radius < self.container.radius:
                     self.orb.radius += 1
-
                 else:
                     time.sleep(2)
                     self.create_orb(running=True)
+
+            if self.orb.speed > 10:
+                if random.random() > 0.9:
+                     self.orb.x_speed, self.orb.y_speed = self.rotate_vector(self.orb.x_speed, self.orb.y_speed, random.uniform(5, 15))
+            
+    def rotate_vector(self, vx, vy, angle):
+        radians = math.radians(angle)
+        cos_angle = math.cos(radians)
+        sin_angle = math.sin(radians)
+        new_vx = vx * cos_angle - vy * sin_angle
+        new_vy = vx * sin_angle + vy * cos_angle
+        return new_vx, new_vy
 
     def speed_in_bounds(self, x_speed, y_speed):
         speed = math.sqrt(x_speed**2 + y_speed**2)

@@ -25,16 +25,16 @@ class CircleContainer:
     @property
     def radius(self):
         return self._radius
-    
+
 class Orb:
     def __init__(self, x, y, color=(255, 255, 255), tail_type='history'):
         self._x = x
         self._y = y
         self.color = color
-        self._y_speed = 0
+        self._y_speed = 4
         self._x_speed = 0
         self._radius = 10 
-        self.acc = 0.03
+        self.acc = 0.18
         self.tail = []
         self.counter = 0 
         self.history_tail_color = [0, 255, 0]
@@ -90,7 +90,7 @@ class Orb:
     def draw(self, scr):
         self.draw_tail(scr)
         pygame.draw.circle(scr, self.history_tail_color, (self._x, self._y), self._radius)
-        pygame.draw.circle(scr, (255, 255, 255), (self._x, self._y), self._radius+1, width=1)
+        pygame.draw.circle(scr, (0, 0, 0), (self._x, self._y), self._radius+1, width=1)
         
     def update_color(self):
         max_color_value = 255
