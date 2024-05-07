@@ -31,7 +31,7 @@ class Orb:
         self._x = x
         self._y = y
         self.color = color
-        self._y_speed = 4
+        self._y_speed = 0
         self._x_speed = 0
         self._radius = 10 
         self.acc = 0.18
@@ -44,6 +44,7 @@ class Orb:
         self.increasing = True
         self.update_interval = 10
         self.speed = 0
+        # self.base_speed = 0.1
         self.tail_type = tail_type 
         self.gets_bigger = False
     

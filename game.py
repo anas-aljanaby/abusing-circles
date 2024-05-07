@@ -7,7 +7,13 @@ import time
 
 class Game:
     def __init__(self, play_sound=False):
-        self.container = CircleContainer(600, 400)
+        self.prev_cont = time.time()
+        self.cur_cont = 0
+        self.orb_out = False
+        self.dynamic_cont = False
+        self.container = CircleContainer(600, 400, radius=200)
+        self.containers = [self.container]
+        # self.add_containers(10)
         self.running = False
         self.screen = pygame.display.set_mode((1200, 800))
         self.orb = None
@@ -20,26 +26,39 @@ class Game:
         self.create_orb()
 
 
-    def get_squared_distance(self):
+    def add_containers(self, n, sep_width=2):
+        if len(self.containers):
+            starting_r = self.containers[-1].radius
+        else:
+            starting_r = 300 
+        for i in range(1, n+1):
+            self.containers.append(CircleContainer(600, 400, radius=starting_r + (i*sep_width)))
+
+    def get_squared_distance(self, cont):
         if not self.orb:
             return 
-        return (self.orb._x - self.container._x) ** 2 + (self.orb._y - self.container._y) ** 2
+        return (self.orb.x - cont.x) ** 2 + (self.orb.y - cont.y) ** 2
+
 
     def check_collision(self):
-        squared_distance = self.get_squared_distance()
+        if not self.containers:
+            return 
+        cont = self.containers[0]
+        squared_distance = self.get_squared_distance(cont)
+
         if not self.orb or not squared_distance:
             return 
 
-        if squared_distance >= (self.container.radius - self.orb.radius) ** 2:
+        if squared_distance >= (cont.radius - self.orb.radius) ** 2:
             if self.play_sound:
                 self.sound.play()
 
-            angle = math.atan2(self.orb.y - self.container.y, self.orb.x - self.container.x)
+            angle = math.atan2(self.orb.y - cont.y, self.orb.x - cont.x)
             normal_x = math.cos(angle)
             normal_y = math.sin(angle)
 
-            self.orb.x = self.container.x + (self.container.radius - self.orb.radius) * normal_x
-            self.orb.y = self.container.y + (self.container.radius - self.orb.radius) * normal_y
+            self.orb.x = cont.x + (cont.radius - self.orb.radius) * normal_x
+            self.orb.y = cont.y + (cont.radius - self.orb.radius) * normal_y
 
             dot = self.orb._x_speed * normal_x + self.orb._y_speed * normal_y
 
@@ -47,12 +66,12 @@ class Game:
             self.orb.y_speed = (self.orb.y_speed - 2 * dot * normal_y) 
 
             if self.increase_speed:
-                y_speed = self.orb.y_speed * 1.02
+                y_speed = self.orb.y_speed * 1.06
                 if (self.orb.x_speed ** 2 + self.orb.y_speed ** 2) < 1600:
                     self.orb.y_speed = y_speed
 
             if self.increase_orb_size:
-                if self.orb.radius < self.container.radius:
+                if self.orb.radius < cont.radius:
                     self.orb.radius += 1
                 else:
                     time.sleep(2)
@@ -60,8 +79,29 @@ class Game:
 
             if self.orb.speed > 10:
                 if random.random() > 0.9:
-                     self.orb.x_speed, self.orb.y_speed = self.rotate_vector(self.orb.x_speed, self.orb.y_speed, random.uniform(5, 15))
-            
+                     self.orb.x_speed, self.orb.y_speed = self.rotate_vector(
+                        self.orb.x_speed, self.orb.y_speed,
+                        random.uniform(5, 15))
+            if self.dynamic_cont:
+                self.containers.pop(0)
+
+                # if self.orb.y > 400:
+                #     self.containers.insert(0, CircleContainer(600, 400, radius=self.containers[0].radius-2))
+                # elif self.orb.y < 400: self.containers.pop(0)
+                # self.add_containers(1)
+
+    def is_orb_out(self):
+        if self.containers:
+            cont = self.containers[-1]
+        else:
+            cont = CircleContainer(600, 400, radius=200)
+
+        squared_dist = self.get_squared_distance(cont)
+        if squared_dist >= (cont.radius + self.orb.radius)**2:
+            self.orb_out = True
+        if squared_dist >= 700_000: #(cont.radius + self.orb.radius)**2: # - self.orb.radius)**2 + 10000:
+            self.running = False
+
     def rotate_vector(self, vx, vy, angle):
         radians = math.radians(angle)
         cos_angle = math.cos(radians)
@@ -84,6 +124,12 @@ class Game:
 
     def reset_game(self, running=False):
         self.create_orb(running=running)
+        self.containers = []
+        self.container = CircleContainer(600, 400, radius=200)
+        self.containers = [self.container]
+        self.orb_out = False
+        # self.add_containers(60)
+
        
     def toggle_size_increase(self):
         if not self.running:
@@ -92,6 +138,9 @@ class Game:
     def toggle_speed_increase(self):
         if not self.running:
             self.increase_speed = not self.increase_speed
+
+    def toggle_container(self):
+        self.dynamic_cont = not self.dynamic_cont
 
 
     def handle_event(self, event):
@@ -103,18 +152,33 @@ class Game:
             self.toggle_size_increase() 
         elif event == 'speed_increase':
             self.toggle_speed_increase()
+        elif event == 'toggle_container':
+            self.toggle_container()
 
     def draw(self):
         if self.orb is None:
             return 
+
         self.screen.fill((0, 0, 0))
 
-        self.container.draw(self.screen)
 
+        for cont in self.containers:
+            cont.draw(self.screen)
+
+        if self.dynamic_cont and self.running and not self.orb_out:
+            if  time.time() - self.prev_cont > 0.7:
+                try:
+                    self.containers.insert(0, CircleContainer(600, 400, radius=self.containers[0].radius-2))
+                except IndexError:
+                    self.containers.insert(0, CircleContainer(600, 400, radius=200))
+                self.prev_cont = time.time()
 
         if self.running:
-            self.check_collision()
             self.orb.update()
+            self.check_collision()
+
+            # self.containers.append(CircleContainer(600, 400, radius=self.containers[0].radius + 5))
+        self.is_orb_out()
 
         self.orb.draw(self.screen)
 
