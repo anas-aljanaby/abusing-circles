@@ -4,6 +4,30 @@ from graphics import CircleContainer, Orb
 import random
 import math
 import time
+import pygame
+import random
+import math
+
+class Particle:
+    def __init__(self, x, y, size):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.color = (255, 255, 255)  # White particles
+        self.lifespan = random.randint(10, 20)  # Lifespan in frames
+        angle = random.uniform(0, 2 * math.pi)
+        speed =1 # random.uniform(1)  # Random speed
+        self.x_speed = speed * math.cos(angle)
+        self.y_speed = speed * math.sin(angle)
+
+    def update(self):
+        self.x += self.x_speed
+        self.y += self.y_speed
+        self.lifespan -= 1
+
+    def draw(self, screen, color):
+        if self.lifespan > 0:
+            pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
 
 class Game:
     def __init__(self, play_sound=False):
@@ -20,6 +44,7 @@ class Game:
         self.increase_orb_size = False
         self.increase_speed = False
         self.play_sound = play_sound 
+        self.particles = []
         if self.play_sound:
             mixer.init()
             self.sound = pygame.mixer.Sound('ball_hit.mp3')
@@ -60,7 +85,7 @@ class Game:
             self.orb.x = cont.x + (cont.radius - self.orb.radius) * normal_x
             self.orb.y = cont.y + (cont.radius - self.orb.radius) * normal_y
 
-            dot = self.orb._x_speed * normal_x + self.orb._y_speed * normal_y
+            dot = self.orb.x_speed * normal_x + self.orb.y_speed * normal_y
 
             self.orb.x_speed = (self.orb.x_speed - 2 * dot * normal_x)  
             self.orb.y_speed = (self.orb.y_speed - 2 * dot * normal_y) 
@@ -85,10 +110,11 @@ class Game:
             if self.dynamic_cont:
                 self.containers.pop(0)
 
-                # if self.orb.y > 400:
-                #     self.containers.insert(0, CircleContainer(600, 400, radius=self.containers[0].radius-2))
-                # elif self.orb.y < 400: self.containers.pop(0)
-                # self.add_containers(1)
+            num_particles = 5 # Number of particles to create
+            self.particles = []
+            for _ in range(num_particles):
+                particle = Particle(self.orb.x, self.orb.y, 1)
+                self.particles.append(particle)
 
     def is_orb_out(self):
         if self.containers:
@@ -115,8 +141,7 @@ class Game:
         return speed < 40 
 
     def create_orb(self, running=False):
-        self.orb = Orb(random.randint(500, 700), random.randint(300, 500),
-                        tail_type='comet')
+        self.orb = Orb(random.randint(500, 700), random.randint(300, 500))
         self.running = running
 
     def play_game(self):
@@ -128,9 +153,7 @@ class Game:
         self.container = CircleContainer(600, 400, radius=200)
         self.containers = [self.container]
         self.orb_out = False
-        # self.add_containers(60)
 
-       
     def toggle_size_increase(self):
         if not self.running:
             self.increase_orb_size = not self.increase_orb_size
@@ -176,8 +199,13 @@ class Game:
         if self.running:
             self.orb.update()
             self.check_collision()
-
-            # self.containers.append(CircleContainer(600, 400, radius=self.containers[0].radius + 5))
+            for particle in self.particles[:]:
+                particle.update()
+                if particle.lifespan <= 0:
+                    self.particles.remove(particle)
+            if self.orb._tail:
+                for pt in self.particles:
+                    pt.draw(self.screen, self.orb._tail[-1][0])
         self.is_orb_out()
 
         self.orb.draw(self.screen)
