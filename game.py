@@ -40,7 +40,7 @@ class Game:
         # self.add_containers(10)
         self.running = False
         self.screen = pygame.display.set_mode((1200, 800))
-        self.orb = None
+        self.orb = self.create_orb()
         self.increase_orb_size = False
         self.increase_speed = False
         self.play_sound = play_sound 
@@ -48,8 +48,6 @@ class Game:
         if self.play_sound:
             mixer.init()
             self.sound = pygame.mixer.Sound('ball_hit.mp3')
-        self.create_orb()
-
 
     def add_containers(self, n, sep_width=2):
         if len(self.containers):
@@ -60,10 +58,7 @@ class Game:
             self.containers.append(CircleContainer(600, 400, radius=starting_r + (i*sep_width)))
 
     def get_squared_distance(self, cont):
-        if not self.orb:
-            return 
         return (self.orb.x - cont.x) ** 2 + (self.orb.y - cont.y) ** 2
-
 
     def check_collision(self):
         if not self.containers:
@@ -110,7 +105,7 @@ class Game:
             if self.dynamic_cont:
                 self.containers.pop(0)
 
-            num_particles = 5 # Number of particles to create
+            num_particles = 5 
             self.particles = []
             for _ in range(num_particles):
                 particle = Particle(self.orb.x, self.orb.y, 1)
@@ -141,14 +136,14 @@ class Game:
         return speed < 40 
 
     def create_orb(self, running=False):
-        self.orb = Orb(random.randint(500, 700), random.randint(300, 500))
         self.running = running
+        return Orb(random.randint(500, 700), random.randint(300, 500))
 
     def play_game(self):
         self.running = True
 
     def reset_game(self, running=False):
-        self.create_orb(running=running)
+        self.orb = self.create_orb(running=running)
         self.containers = []
         self.container = CircleContainer(600, 400, radius=200)
         self.containers = [self.container]
@@ -165,7 +160,6 @@ class Game:
     def toggle_container(self):
         self.dynamic_cont = not self.dynamic_cont
 
-
     def handle_event(self, event):
         if event.lower() == 'play':
             self.play_game()
@@ -178,17 +172,8 @@ class Game:
         elif event == 'toggle_container':
             self.toggle_container()
 
-    def draw(self):
-        if self.orb is None:
-            return 
-
-        self.screen.fill((0, 0, 0))
-
-
-        for cont in self.containers:
-            cont.draw(self.screen)
-
-        if self.dynamic_cont and self.running and not self.orb_out:
+    def update_container(self):
+        if self.dynamic_cont and not self.orb_out:
             if  time.time() - self.prev_cont > 0.7:
                 try:
                     self.containers.insert(0, CircleContainer(600, 400, radius=self.containers[0].radius-2))
@@ -196,18 +181,34 @@ class Game:
                     self.containers.insert(0, CircleContainer(600, 400, radius=200))
                 self.prev_cont = time.time()
 
-        if self.running:
-            self.orb.update()
-            self.check_collision()
-            for particle in self.particles[:]:
-                particle.update()
-                if particle.lifespan <= 0:
-                    self.particles.remove(particle)
-            if self.orb._tail:
-                for pt in self.particles:
-                    pt.draw(self.screen, self.orb._tail[-1][0])
-        self.is_orb_out()
-
+    def draw(self):
+        self.screen.fill((0, 0, 0))
+        for cont in self.containers:
+            cont.draw(self.screen)
         self.orb.draw(self.screen)
+        if self.orb._tail:
+            for pt in self.particles:
+                pt.draw(self.screen, self.orb._tail[-1][0])
+
+    def update_particles(self):
+        for particle in self.particles[:]:
+            particle.update()
+            if particle.lifespan <= 0:
+                self.particles.remove(particle)
+
+    def update(self):
+        self.update_container()
+        self.orb.update()
+        self.is_orb_out()
+        self.check_collision()
+        self.update_particles()
+
+    def update_draw(self):
+        self.draw()
+
+        if self.running:
+            self.update()
+
+
 
 

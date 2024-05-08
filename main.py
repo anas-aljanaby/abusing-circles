@@ -18,7 +18,7 @@ while running:
            running = False
         ui_manager.handle_event(event)
 
-    game.draw()
+    game.update_draw()
     ui_manager.draw()
 
     fps = clock.get_fps()
