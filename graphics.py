@@ -1,7 +1,6 @@
 import pygame
-import pygame.gfxdraw
 import math
-
+import random
 
 class CircleContainer:
     def __init__(self, x, y, color='white', radius=300, shadow=True):
@@ -26,6 +25,28 @@ class CircleContainer:
     def radius(self):
         return self._radius
 
+
+class Particle:
+    def __init__(self, x, y, size):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.color = (255, 255, 255)
+        self.lifespan = random.randint(10, 20)
+        angle = random.uniform(0, 2 * math.pi)
+        speed = 1
+        self.x_speed = speed * math.cos(angle)
+        self.y_speed = speed * math.sin(angle)
+
+    def update(self):
+        self.x += self.x_speed
+        self.y += self.y_speed
+        self.lifespan -= 1
+
+    def draw(self, screen, color):
+        if self.lifespan > 0:
+            pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
+
 class Orb:
     def __init__(self, x, y):
         self.x = x
@@ -33,7 +54,7 @@ class Orb:
         self.y_speed = 0
         self.x_speed = 0
         self.radius = 10 
-        self._acc = 0.18
+        self._acc = 0.1
         self._tail = []
         self._counter = 0 
         self._history_tail_color = [0, 255, 0]
@@ -43,7 +64,6 @@ class Orb:
         self.speed = 0
 
     def draw(self, scr):
-        self.draw_tail(scr)
         pygame.draw.circle(scr, self._history_tail_color, (self.x, self.y), self.radius)
         pygame.draw.circle(scr, (255, 255, 255), (self.x, self.y), self.radius + 1, width=2)
 
@@ -86,3 +106,4 @@ class Orb:
     def update(self):
         self.update_pos()
         self.update_tail()
+

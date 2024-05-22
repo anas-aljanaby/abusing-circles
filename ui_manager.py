@@ -7,35 +7,28 @@ RED = (255, 0, 0)
 DARK_RED = (200, 0, 0)
 
 class Button:
-    def __init__(self, x, y, width, height, text='', action=None, color='white', highlight_color=OFF_WHITE, font_color='black'):
+    def __init__(self, x, y, width, height, text='', action=None,
+                 color='white', font_color='black'):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.text = text
         self.color = color
-        self.original_color = color
-        self.highlight_color = highlight_color
         self.font_color = font_color
         self.font = pygame.font.SysFont(None, 30)
         self.rect = pygame.Rect(x, y, width, height)
         self.action = action
 
-    def draw(self, win, outline=None):
-        if outline:
-            pygame.draw.rect(win, outline, (self.x-2, self.y-2, self.width+4, self.height+4), 0)
-        
+    def draw(self, win):
         pygame.draw.rect(win, self.color, self.rect, 0)
-        
         if self.text != '':
             text = self.font.render(self.text, True, self.font_color)
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
 
     def is_over(self, pos):
         if self.rect.collidepoint(pos):
-            self.color = self.highlight_color
             return True
-        self.color = self.original_color
         return False
 
 
@@ -47,13 +40,9 @@ class ToggleButton(Button):
         super().__init__(*args, **kwargs)
         self.is_on = False
 
-    def draw(self, win, outline=None):
+    def draw(self, win):
         color = self.color_on if self.is_on else self.color_off
-        if outline:
-            pygame.draw.rect(win, outline, (self.x-2, self.y-2, self.width+4, self.height+4), 0)
-        
         pygame.draw.rect(win, color, self.rect, 0)
-        
         if self.text != '':
             text = self.font.render(self.text, True, self.font_color)
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
@@ -61,13 +50,14 @@ class ToggleButton(Button):
     def toggle(self):
         self.is_on = not self.is_on
 
-
 class UIManager:
     def __init__(self, game):
         self.buttons = []
         self.toggle_buttons = []
         self.game = game
         self.create_buttons()
+        for bt in self.buttons:
+            bt.draw(self.game.screen)
 
     def create_buttons(self):
         button_configs = [
@@ -95,7 +85,6 @@ class UIManager:
 
     def draw(self):
         for bt in self.buttons:
-            bt.is_over(pygame.mouse.get_pos())
             bt.draw(self.game.screen)
 
     def reset(self):
@@ -109,5 +98,5 @@ class UIManager:
                     if type(bt) == ToggleButton:
                         if not self.game.running:
                             bt.toggle()
+                            bt.draw(self.game.screen)
                     self.game.handle_event(bt.action)
-

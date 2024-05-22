@@ -1,33 +1,10 @@
 import pygame
 from pygame import mixer
-from graphics import CircleContainer, Orb
+from graphics import CircleContainer, Orb, Particle
 import random
 import math
 import time
-import pygame
-import random
-import math
 
-class Particle:
-    def __init__(self, x, y, size):
-        self.x = x
-        self.y = y
-        self.size = size
-        self.color = (255, 255, 255)  # White particles
-        self.lifespan = random.randint(10, 20)  # Lifespan in frames
-        angle = random.uniform(0, 2 * math.pi)
-        speed =1 # random.uniform(1)  # Random speed
-        self.x_speed = speed * math.cos(angle)
-        self.y_speed = speed * math.sin(angle)
-
-    def update(self):
-        self.x += self.x_speed
-        self.y += self.y_speed
-        self.lifespan -= 1
-
-    def draw(self, screen, color):
-        if self.lifespan > 0:
-            pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
 
 class Game:
     def __init__(self, play_sound=False):
@@ -37,7 +14,8 @@ class Game:
         self.dynamic_cont = False
         self.container = CircleContainer(600, 400, radius=200)
         self.containers = [self.container]
-        # self.add_containers(10)
+        self.speed_mult = 1.02
+        self.max_speed = 1600
         self.running = False
         self.screen = pygame.display.set_mode((1200, 800))
         self.orb = self.create_orb()
@@ -66,9 +44,6 @@ class Game:
         cont = self.containers[0]
         squared_distance = self.get_squared_distance(cont)
 
-        if not self.orb or not squared_distance:
-            return 
-
         if squared_distance >= (cont.radius - self.orb.radius) ** 2:
             if self.play_sound:
                 self.sound.play()
@@ -86,8 +61,8 @@ class Game:
             self.orb.y_speed = (self.orb.y_speed - 2 * dot * normal_y) 
 
             if self.increase_speed:
-                y_speed = self.orb.y_speed * 1.06
-                if (self.orb.x_speed ** 2 + self.orb.y_speed ** 2) < 1600:
+                y_speed = self.orb.y_speed * self.speed_mult 
+                if (self.orb.x_speed ** 2 + self.orb.y_speed ** 2) < self.max_speed:
                     self.orb.y_speed = y_speed
 
             if self.increase_orb_size:
@@ -102,14 +77,11 @@ class Game:
                      self.orb.x_speed, self.orb.y_speed = self.rotate_vector(
                         self.orb.x_speed, self.orb.y_speed,
                         random.uniform(5, 15))
+
             if self.dynamic_cont:
                 self.containers.pop(0)
 
-            num_particles = 5 
-            self.particles = []
-            for _ in range(num_particles):
-                particle = Particle(self.orb.x, self.orb.y, 1)
-                self.particles.append(particle)
+            self.create_particles()
 
     def is_orb_out(self):
         if self.containers:
@@ -190,6 +162,13 @@ class Game:
             for pt in self.particles:
                 pt.draw(self.screen, self.orb._tail[-1][0])
 
+    def create_particles(self):
+        num_particles = 5 
+        self.particles = []
+        for _ in range(num_particles):
+            particle = Particle(self.orb.x, self.orb.y, 1)
+            self.particles.append(particle)
+
     def update_particles(self):
         for particle in self.particles[:]:
             particle.update()
@@ -208,7 +187,3 @@ class Game:
 
         if self.running:
             self.update()
-
-
-
-
