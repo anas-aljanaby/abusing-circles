@@ -5,9 +5,19 @@ import random
 import math
 import time
 
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+CONT_WIDTH = SCREEN_WIDTH / 2
+CONT_HEIGHT = SCREEN_HEIGHT / 2
+MIN_SPEED_FOR_ROTATION = 10
+ROTATION_PROBABILITY = 0.9
+MIN_ROTATION_ANGLE = 5
+MAX_ROTATION_ANGLE = 15
+
 
 class Game:
-    def __init__(self, play_sound=False):
+    def __init__(self, play_sound=False, radius=350, speed_boost=1.06,
+                 max_square_speed=1600):
         self.prev_cont = time.time()
         self.cur_cont = 0
         self.orb_out = False
@@ -16,14 +26,14 @@ class Game:
         self.screen_height = 800
         self.cont_width = self.screen_width / 2
         self.cont_height = self.screen_height / 2 
-        self.radius = 350
+        self.radius = radius 
         self.screen = pygame.display.set_mode((self.screen_width,
                                                self.screen_height))
         self.container = CircleContainer(self.cont_width,
                                          self.cont_height, radius=self.radius)
         self.containers = [self.container]
-        self.speed_mult = 1.06
-        self.max_speed = 1600
+        self.speed_boost = speed_boost
+        self.max_square_speed = max_square_speed
         self.running = False
         self.orb = self.create_orb()
         self.increase_orb_size = False
@@ -34,14 +44,14 @@ class Game:
             mixer.init()
             self.sound = pygame.mixer.Sound('ball_hit.mp3')
 
-    def get_squared_distance(self, cont):
+    def square_dist_to_container(self, cont):
         return (self.orb.x - cont.x) ** 2 + (self.orb.y - cont.y) ** 2
 
     def check_collision(self):
         if not self.containers:
             return 
         cont = self.containers[0]
-        squared_distance = self.get_squared_distance(cont)
+        squared_distance = self.square_dist_to_container(cont)
 
         if squared_distance >= (cont.radius - self.orb.radius) ** 2:
             if self.play_sound:
@@ -60,27 +70,33 @@ class Game:
             self.orb.y_speed = (self.orb.y_speed - 2 * dot * normal_y) 
 
             if self.increase_speed:
-                y_speed = self.orb.y_speed * self.speed_mult 
-                if (self.orb.x_speed ** 2 + self.orb.y_speed ** 2) < self.max_speed:
-                    self.orb.y_speed = y_speed
+                self.boost_orb_speed()
 
             if self.increase_orb_size:
-                if self.orb.radius < cont.radius:
-                    self.orb.radius += 1
-                else:
-                    time.sleep(2)
-                    self.create_orb(running=True)
+                self.grow_orb(cont)
 
-            if self.orb.speed > 10:
-                if random.random() > 0.9:
-                     self.orb.x_speed, self.orb.y_speed = self.rotate_vector(
+            if self.orb.speed > MIN_SPEED_FOR_ROTATION:
+                if random.random() > ROTATION_PROBABILITY:
+                    self.orb.x_speed, self.orb.y_speed = self.rotate_vector(
                         self.orb.x_speed, self.orb.y_speed,
-                        random.uniform(5, 15))
+                        random.uniform(MIN_ROTATION_ANGLE, MAX_ROTATION_ANGLE))
 
             if self.dynamic_cont:
                 self.containers.pop(0)
 
             self.create_particles()
+
+    def boost_orb_speed(self):
+        y_speed = self.orb.y_speed * self.speed_boost 
+        if (self.orb.x_speed ** 2 + self.orb.y_speed ** 2) < self.max_square_speed:
+            self.orb.y_speed = y_speed
+
+    def grow_orb(self, cont):
+        if self.orb.radius >= cont.radius:
+            time.sleep(2)
+            self.create_orb(running=True)
+        else:
+            self.orb.radius += 1
 
     def is_orb_out(self):
         if self.containers:
@@ -88,7 +104,7 @@ class Game:
         else:
             cont = CircleContainer(self.cont_width, self.cont_height, radius=self.radius)
 
-        squared_dist = self.get_squared_distance(cont)
+        squared_dist = self.square_dist_to_container(cont)
         if squared_dist >= (cont.radius + self.orb.radius)**2:
             self.orb_out = True
         if squared_dist >= 700_000: #(cont.radius + self.orb.radius)**2: # - self.orb.radius)**2 + 10000:
