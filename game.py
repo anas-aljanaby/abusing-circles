@@ -14,7 +14,7 @@ class Game:
         self.dynamic_cont = False
         self.container = CircleContainer(600, 400, radius=200)
         self.containers = [self.container]
-        self.speed_mult = 1.02
+        self.speed_mult = 1.06
         self.max_speed = 1600
         self.running = False
         self.screen = pygame.display.set_mode((1200, 800))
