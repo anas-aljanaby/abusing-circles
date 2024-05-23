@@ -12,12 +12,19 @@ class Game:
         self.cur_cont = 0
         self.orb_out = False
         self.dynamic_cont = False
-        self.container = CircleContainer(600, 400, radius=200)
+        self.screen_width = 1200 
+        self.screen_height = 800
+        self.cont_width = self.screen_width / 2
+        self.cont_height = self.screen_height / 2 
+        self.radius = 350
+        self.screen = pygame.display.set_mode((self.screen_width,
+                                               self.screen_height))
+        self.container = CircleContainer(self.cont_width,
+                                         self.cont_height, radius=self.radius)
         self.containers = [self.container]
         self.speed_mult = 1.06
         self.max_speed = 1600
         self.running = False
-        self.screen = pygame.display.set_mode((1200, 800))
         self.orb = self.create_orb()
         self.increase_orb_size = False
         self.increase_speed = False
@@ -26,14 +33,6 @@ class Game:
         if self.play_sound:
             mixer.init()
             self.sound = pygame.mixer.Sound('ball_hit.mp3')
-
-    def add_containers(self, n, sep_width=2):
-        if len(self.containers):
-            starting_r = self.containers[-1].radius
-        else:
-            starting_r = 300 
-        for i in range(1, n+1):
-            self.containers.append(CircleContainer(600, 400, radius=starting_r + (i*sep_width)))
 
     def get_squared_distance(self, cont):
         return (self.orb.x - cont.x) ** 2 + (self.orb.y - cont.y) ** 2
@@ -87,7 +86,7 @@ class Game:
         if self.containers:
             cont = self.containers[-1]
         else:
-            cont = CircleContainer(600, 400, radius=200)
+            cont = CircleContainer(self.cont_width, self.cont_height, radius=self.radius)
 
         squared_dist = self.get_squared_distance(cont)
         if squared_dist >= (cont.radius + self.orb.radius)**2:
@@ -117,7 +116,7 @@ class Game:
     def reset_game(self, running=False):
         self.orb = self.create_orb(running=running)
         self.containers = []
-        self.container = CircleContainer(600, 400, radius=200)
+        self.container = CircleContainer(self.cont_width, self.cont_height, radius=self.radius)
         self.containers = [self.container]
         self.orb_out = False
 
@@ -148,9 +147,9 @@ class Game:
         if self.dynamic_cont and not self.orb_out:
             if  time.time() - self.prev_cont > 0.7:
                 try:
-                    self.containers.insert(0, CircleContainer(600, 400, radius=self.containers[0].radius-2))
+                    self.containers.insert(0, CircleContainer(self.cont_width, self.cont_height, radius=self.containers[0].radius-2))
                 except IndexError:
-                    self.containers.insert(0, CircleContainer(600, 400, radius=200))
+                    self.containers.insert(0, CircleContainer(self.cont_width, self.cont_height, radius=self.radius))
                 self.prev_cont = time.time()
 
     def draw(self):
