@@ -64,7 +64,6 @@ class Orb:
 
     def draw(self, scr):
         pygame.draw.circle(scr, self.color, (self.x, self.y), self.radius)
-        # pygame.draw.circle(scr, (255, 255, 255), (self.x, self.y), self.radius + 1, width=2)
 
     def update_color(self):
         max_color_value = 255

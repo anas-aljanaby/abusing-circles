@@ -65,6 +65,8 @@ class Game:
         squared_distance = self.square_dist_to_container(cont)
 
         if squared_distance >= (cont.radius - self.orb.radius) ** 2:
+            self.create_particles()
+
             if self.play_sound:
                 self.sound.play()
 
@@ -95,7 +97,6 @@ class Game:
             if self.dynamic_cont:
                 self.containers.pop(0)
 
-            self.create_particles()
 
     def boost_orb_speed(self):
         y_speed = self.orb.y_speed * self.speed_boost 
@@ -182,10 +183,11 @@ class Game:
             pt.draw(self.screen, self.orb.color)
 
     def create_particles(self):
+        x, y = self.orb.x, self.orb.y
         num_particles = 5 
         self.particles = []
         for _ in range(num_particles):
-            particle = Particle(self.orb.x, self.orb.y, 1)
+            particle = Particle(x, y, 1)
             self.particles.append(particle)
 
     def update_particles(self):
