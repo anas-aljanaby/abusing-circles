@@ -21,7 +21,7 @@ ORB_Y_MIN = 300
 ORB_Y_MAX = 500
 
 class Game:
-    def __init__(self, play_sound=False, radius=350, speed_boost=1.06,
+    def __init__(self, silent=False, radius=350, speed_boost=1.06,
                  add_cont_interval=0.9, max_square_speed=1600):
         self.prev_cont = time.time()
         self.cur_cont = 0
@@ -40,10 +40,9 @@ class Game:
         self.orb = self.create_orb()
         self.increase_orb_size = False
         self.increase_speed = False
-        self.play_sound = play_sound 
+        self.silent = silent 
         self.particles = []
         self.add_cont_interval = add_cont_interval
-        
         self.event_map = {
             'play': self.play_game,
             'reset': self.reset_game,
@@ -51,7 +50,7 @@ class Game:
             'speed_increase': self.toggle_speed_increase,
             'toggle_container': self.toggle_container,
             }
-        if self.play_sound:
+        if not self.silent:
             mixer.init()
             self.sound = pygame.mixer.Sound('ball_hit.mp3')
 
@@ -65,14 +64,15 @@ class Game:
         squared_distance = self.square_dist_to_container(cont)
 
         if squared_distance >= (cont.radius - self.orb.radius) ** 2:
-            self.create_particles()
-
-            if self.play_sound:
+            if not self.silent:
                 self.sound.play()
 
             angle = math.atan2(self.orb.y - cont.y, self.orb.x - cont.x)
             normal_x = math.cos(angle)
             normal_y = math.sin(angle)
+            collision_x = self.container.x + self.container.radius * math.cos(angle)
+            collision_y = self.container.y + self.container.radius * math.sin(angle)
+            self.create_particles(collision_x, collision_y)
 
             self.orb.x = cont.x + (cont.radius - self.orb.radius) * normal_x
             self.orb.y = cont.y + (cont.radius - self.orb.radius) * normal_y
@@ -144,6 +144,7 @@ class Game:
 
     def reset_game(self, running=False):
         self.orb = self.create_orb(running=running)
+        self.particles = []
         self.containers = [self.container]
         self.orb_out = False
 
@@ -182,12 +183,13 @@ class Game:
         for pt in self.particles:
             pt.draw(self.screen, self.orb.color)
 
-    def create_particles(self):
-        x, y = self.orb.x, self.orb.y
-        num_particles = 5 
-        self.particles = []
+    def create_particles(self, collision_x, collision_y):
+        num_particles = max(10, self.orb.radius // 2)
+        particle_size = 1 if self.orb.radius < 100 else 3
+        # self.particles = []
         for _ in range(num_particles):
-            particle = Particle(x, y, 1)
+            
+            particle = Particle(collision_x, collision_y, particle_size)
             self.particles.append(particle)
 
     def update_particles(self):

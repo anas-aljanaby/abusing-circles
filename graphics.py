@@ -4,26 +4,14 @@ import random
 
 class CircleContainer:
     def __init__(self, x, y, color='white', radius=300, shadow=True):
-        self._x = x
-        self._y = y
-        self._radius = radius 
+        self.x = x
+        self.y = y
+        self.radius = radius 
         self.color = color
         self.shadow = shadow
 
     def draw(self, scr):
-        pygame.draw.circle(scr, (self.color), (self._x, self._y), self._radius, width=1)
-
-    @property
-    def x(self):
-        return self._x
-
-    @property
-    def y(self):
-        return self._y
-
-    @property
-    def radius(self):
-        return self._radius
+        pygame.draw.circle(scr, (self.color), (self.x, self.y), self.radius, width=1)
 
 
 class Particle:
@@ -32,7 +20,7 @@ class Particle:
         self.y = y
         self.size = size
         self.color = (255, 255, 255)
-        self.lifespan = random.randint(10, 20)
+        self.lifespan = random.randint(10, 30)
         angle = random.uniform(0, 2 * math.pi)
         speed = 1
         self.x_speed = speed * math.cos(angle)

@@ -37,12 +37,12 @@ def render_text(text, pos, screen, font):
     screen.blit(text_surface, pos)
 
 
-def main(sound=False):
+def main(silent=False):
     pygame.init()
     font = pygame.font.Font(None, 30)
 
     clock = pygame.time.Clock()
-    game = Game(play_sound=sound)
+    game = Game(silent=silent)
     ui_manager = UIManager(game)
     running = True
 
@@ -66,7 +66,7 @@ def main(sound=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--sound', '-s', action='store_true', help='Enable Sound')
+    parser.add_argument('--silent', '-s', action='store_true', help='Turn off sound')
     parser.add_argument('--profile', '-p', action='store_true', help='Enable Profiling')
     args = parser.parse_args()
 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         profiler = cProfile.Profile()
         profiler.enable()
 
-    main(sound=args.sound)
+    main(silent=args.silent)
 
     if args.profile:
         profiler.disable()
