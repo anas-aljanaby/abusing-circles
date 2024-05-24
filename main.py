@@ -55,6 +55,8 @@ def main():
         render_text(f'FPS: {fps:.2f}', (10, 10), game.screen, font)
         render_text(f'Speed {game.orb.speed:.2f}', (10, 30), game.screen, font)
         render_text(f'Size {game.orb.radius:.2f}', (10, 50), game.screen, font)
+        render_text('Upon collision: ', (10, 175), game.screen, font)
+        render_text('Container: ', (10, 270), game.screen, font)
 
         pygame.display.update()
         clock.tick(120)

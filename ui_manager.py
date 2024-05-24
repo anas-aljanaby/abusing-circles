@@ -42,6 +42,8 @@ class ToggleButton(Button):
 
     def draw(self, win):
         color = self.color_on if self.is_on else self.color_off
+        if self.text in ['Static', 'Dynamic']:
+           self.text = 'Dynamic' if self.is_on else 'Static' 
         pygame.draw.rect(win, color, self.rect, 0)
         if self.text != '':
             text = self.font.render(self.text, True, self.font_color)
@@ -65,11 +67,11 @@ class UIManager:
             {'x': 10, 'y': 122, 'width': 80, 'height': 20, 'label': 'Reset', 'action': 'reset'}, 
         ]
         toggle_button_configs = [
-            {'x': 10, 'y': 170, 'width': 100, 'height': 25, 'label': 'Size++',
+            {'x': 10, 'y': 200, 'width': 100, 'height': 25, 'label': 'Size++',
              'action': 'size_increase'},
-            {'x': 10, 'y': 200, 'width': 100, 'height': 25, 'label': 'Speed++',
+            {'x': 10, 'y': 230, 'width': 100, 'height': 25, 'label': 'Speed++',
              'action': 'speed_increase'},
-            {'x': 10, 'y': 230, 'width': 100, 'height': 25, 'label': 'Container',
+            {'x': 10, 'y': 295, 'width': 100, 'height': 25, 'label': 'Static',
              'action': 'toggle_container'}
         ]
 
