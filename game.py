@@ -178,9 +178,8 @@ class Game:
         for cont in self.containers:
             cont.draw(self.screen)
         self.orb.draw(self.screen)
-        if self.orb._tail:
-            for pt in self.particles:
-                pt.draw(self.screen, self.orb._tail[-1][0])
+        for pt in self.particles:
+            pt.draw(self.screen, self.orb.color)
 
     def create_particles(self):
         num_particles = 5 

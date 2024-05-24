@@ -54,18 +54,17 @@ class Orb:
         self.y_speed = 0
         self.x_speed = 0
         self.radius = 10 
+        self.color = [0, 255, 0]
         self._acc = 0.1
-        self._tail = []
         self._counter = 0 
-        self._history_tail_color = [0, 255, 0]
         self._color_idx = 0
         self._increasing_color = True
         self._update_interval = 10
         self.speed = 0
 
     def draw(self, scr):
-        pygame.draw.circle(scr, self._history_tail_color, (self.x, self.y), self.radius)
-        pygame.draw.circle(scr, (255, 255, 255), (self.x, self.y), self.radius + 1, width=2)
+        pygame.draw.circle(scr, self.color, (self.x, self.y), self.radius)
+        # pygame.draw.circle(scr, (255, 255, 255), (self.x, self.y), self.radius + 1, width=2)
 
     def update_color(self):
         max_color_value = 255
@@ -73,14 +72,14 @@ class Orb:
         step = 1  
 
         if self._increasing_color:
-            if self._history_tail_color[self._color_idx] < max_color_value:
-                self._history_tail_color[self._color_idx] += step
+            if self.color[self._color_idx] < max_color_value:
+                self.color[self._color_idx] += step
             else:
                 self._increasing_color = False
                 self._color_idx = (self._color_idx + 1) % 3
         else:
-            if self._history_tail_color[self._color_idx] > min_color_value:
-                self._history_tail_color[self._color_idx] -= step
+            if self.color[self._color_idx] > min_color_value:
+                self.color[self._color_idx] -= step
             else:
                 self._increasing_color = True
                 self._color_idx = (self._color_idx + 1) % 3
@@ -91,19 +90,6 @@ class Orb:
         self.x += self.x_speed
         self.speed = math.sqrt(self.x_speed**2 + self.y_speed**2)
 
-    def update_tail(self):
-        self.update_color()
-        self._tail.append((tuple(self._history_tail_color), (self.x, self.y)))
-
-    def draw_tail(self, scr):
-        for i, p in enumerate(self._tail[-10:]):
-            surface = pygame.Surface((1200, 800), pygame.SRCALPHA)
-            color = p[0]  + (0 + (i*25),)
-            pygame.draw.circle(surface, color, p[1], self.radius)
-            pygame.draw.circle(surface, (0, 0, 0), p[1], self.radius + 1, width=1)
-            scr.blit(surface, (0, 0))
-
     def update(self):
         self.update_pos()
-        self.update_tail()
-
+        self.update_color()
