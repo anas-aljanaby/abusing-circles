@@ -15,7 +15,7 @@ class CircleContainer:
 
 
 class Particle:
-    def __init__(self, x, y, size):
+    def __init__(self, x, y, size, max_size=30):
         self.x = x
         self.y = y
         self.size = size

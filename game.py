@@ -22,7 +22,7 @@ ORB_Y_MAX = 500
 
 class Game:
     def __init__(self, silent=False, radius=350, speed_boost=1.06,
-                 add_cont_interval=0.9, max_square_speed=1600):
+                 add_cont_interval=0.4, max_square_speed=1600):
         self.prev_cont = time.time()
         self.cur_cont = 0
         self.orb_out = False
@@ -114,7 +114,7 @@ class Game:
         squared_dist = self.square_dist_to_container(self.container)
         if squared_dist >= (self.container.radius + self.orb.radius)**2:
             self.orb_out = True
-    
+
     def orb_out_screen(self):
         orb_x_out_of_bounds = self.orb.x > SCREEN_RIGHT_BOUND or self.orb.x < SCREEN_LEFT_BOUND
         orb_y_out_of_bounds = self.orb.y > SCREEN_BOTTOM_BOUND or self.orb.y < SCREEN_TOP_BOUND
@@ -184,12 +184,9 @@ class Game:
             pt.draw(self.screen, self.orb.color)
 
     def create_particles(self, collision_x, collision_y):
-        num_particles = max(10, self.orb.radius // 2)
-        particle_size = 1 if self.orb.radius < 100 else 3
-        # self.particles = []
+        num_particles = 7
         for _ in range(num_particles):
-            
-            particle = Particle(collision_x, collision_y, particle_size)
+            particle = Particle(collision_x, collision_y, random.randint(1, 2))
             self.particles.append(particle)
 
     def update_particles(self):
