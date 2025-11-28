@@ -6,6 +6,7 @@ DARK_GREEN = (0, 200, 0)
 RED = (255, 0, 0)
 DARK_RED = (200, 0, 0)
 
+
 class Button:
     def __init__(self, x, y, width, height, text='', action=None,
                  color='white', font_color='black'):
@@ -71,10 +72,9 @@ class UIManager:
              'action': 'size_increase'},
             {'x': 10, 'y': 230, 'width': 100, 'height': 25, 'label': 'Speed++',
              'action': 'speed_increase'},
-            {'x': 10, 'y': 295, 'width': 100, 'height': 25, 'label': 'Static',
+            {'x': 10, 'y': 290, 'width': 100, 'height': 25, 'label': 'Static',
              'action': 'toggle_container'}
         ]
-
         for config in button_configs:
             self.buttons.append(Button(config['x'], config['y'], config['width'], config['height'], config['label'], action=config['action']))
         for config in toggle_button_configs:

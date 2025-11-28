@@ -2,11 +2,12 @@ import pygame
 import math
 import random
 
+
 class CircleContainer:
     def __init__(self, x, y, color='white', radius=300, shadow=True):
         self.x = x
         self.y = y
-        self.radius = radius 
+        self.radius = radius
         self.color = color
         self.shadow = shadow
 
@@ -15,7 +16,7 @@ class CircleContainer:
 
 
 class Particle:
-    def __init__(self, x, y, size, max_size=30):
+    def __init__(self, x, y, size):
         self.x = x
         self.y = y
         self.size = size
@@ -35,19 +36,19 @@ class Particle:
         if self.lifespan > 0:
             pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
 
+
 class Orb:
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.y_speed = 0
         self.x_speed = 0
-        self.radius = 10 
+        self.radius = 20
         self.color = [0, 255, 0]
         self._acc = 0.1
-        self._counter = 0 
+        self._counter = 0
         self._color_idx = 0
         self._increasing_color = True
-        self._update_interval = 10
         self.speed = 0
 
     def draw(self, scr):
@@ -56,7 +57,7 @@ class Orb:
     def update_color(self):
         max_color_value = 255
         min_color_value = 0
-        step = 1  
+        step = 1
 
         if self._increasing_color:
             if self.color[self._color_idx] < max_color_value:
